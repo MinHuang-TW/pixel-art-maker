@@ -1,25 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useMemo, useState } from 'react';
+import Grid from './components/Grid';
+import ColorPicker from './components/ColorPicker';
+import useStyles from './App.styles';
 
-function App() {
+const offCell = {
+  on: false,
+  color: '#000000',
+};
+const initialCells = Array.from({ length: 40 }, () => offCell);
+
+const App = () => {
+  const [cells, setCells] = useState(initialCells);
+  const [currentColor, setCurrentColor] = useState('#56BC58');
+  const classes = useStyles();
+
+  const colorSwatch = useMemo(() => [...new Set(
+    cells
+      .filter(({ on }) => on)
+      .map(({ color }) => color))
+  ], [cells]);
+
+  const colorString = useMemo(() => cells
+    .map(({ color }) => color.slice(1))
+    .join(',')
+  , [cells]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={classes.app}>
+      <div className={classes.colorSwatchContainer}>
+        <ColorPicker 
+          currentColor={currentColor} 
+          onSetColor={setCurrentColor} 
+        />
+        {colorSwatch.slice(-5).map((color) => (
+          <div
+            key={color}
+            className={classes.colorSwatch}
+            style={{ background: color }}
+            onClick={() => setCurrentColor(color)}
+          />
+        ))}
+      </div>
+      <Grid cells={cells} setCells={setCells} currentColor={currentColor} />
+      <p className={classes.colorString}>{colorString}</p>
     </div>
   );
-}
+};
 
 export default App;
